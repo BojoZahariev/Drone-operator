@@ -12,9 +12,12 @@
 
 <body>
     <p class="instructions">Use WASD or Arrow Keys to move the drone.<br>Hold <strong>SPACEBAR</strong> to descend and
-        tag targets (Squares)!</p>
-
+        tag targets (Z Circles)!</p>
+    <div id="scoreBoard">Score: 0</div>
+    <div id="gameOver">GAME OVER</div>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <audio id="explosionSound" src="explosion-312361.mp3" preload="auto"></audio>
+
 
     <script src="script.js"></script>
 </body>

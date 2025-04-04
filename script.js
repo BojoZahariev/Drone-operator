@@ -1,19 +1,26 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const scoreBoard = document.getElementById('scoreBoard');
+const explosionSound = document.getElementById('explosionSound');
 
 const DRONE_SIZE = 40;
 const DRONE_SPEED = 4;
-const TARGET_SIZE = 20;
+const TARGET_RADIUS = 15;
 const NUM_TARGETS = 7;
 const ESCAPE_SPEED = 2;
 let isDescending = false;
+let descendStartTime = null;
 let droneScale = 1.0;
+let score = 0;
+
 let drone = { x: canvas.width / 2, y: canvas.height / 2, dx: 0, dy: 0 };
 let targets = [];
+let explosions = [];
 let keysPressed = {};
 
 function handleKeyDown(e) {
     if (e.key === ' ') {
+        if (!isDescending) descendStartTime = Date.now();
         isDescending = true;
     } else {
         keysPressed[e.key.toLowerCase()] = true;
@@ -34,45 +41,73 @@ function drawDrone() {
     ctx.translate(drone.x, drone.y);
     ctx.scale(droneScale, droneScale);
 
-    // Draw drone X body
+    ctx.fillStyle = "#2F4F4F";
+    ctx.fillRect(-10, -15, 20, 30);
+
     ctx.strokeStyle = "#696969";
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 4;
+
     ctx.beginPath();
     ctx.moveTo(-DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(DRONE_SIZE / 2, DRONE_SIZE / 2);
-    ctx.moveTo(DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(-DRONE_SIZE / 2, DRONE_SIZE / 2);
+    ctx.lineTo(-10, -15);
     ctx.stroke();
 
-    // Draw propellers
+    ctx.beginPath();
+    ctx.moveTo(DRONE_SIZE / 2, -DRONE_SIZE / 2);
+    ctx.lineTo(10, -15);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-DRONE_SIZE / 2, DRONE_SIZE / 2);
+    ctx.lineTo(-10, 15);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(DRONE_SIZE / 2, DRONE_SIZE / 2);
+    ctx.lineTo(10, 15);
+    ctx.stroke();
+
     ctx.fillStyle = "#A9A9A9";
-    for (let i = 0; i < 4; i++) {
-        let angle = (Math.PI / 4) + (i * Math.PI / 2);
-        let propX = Math.cos(angle) * DRONE_SIZE * 0.7;
-        let propY = Math.sin(angle) * DRONE_SIZE * 0.7;
+    const offsets = [
+        [-DRONE_SIZE / 2, -DRONE_SIZE / 2],
+        [DRONE_SIZE / 2, -DRONE_SIZE / 2],
+        [-DRONE_SIZE / 2, DRONE_SIZE / 2],
+        [DRONE_SIZE / 2, DRONE_SIZE / 2],
+    ];
+    for (let [x, y] of offsets) {
         ctx.beginPath();
-        ctx.arc(propX, propY, 8, 0, Math.PI * 2);
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
         ctx.fill();
     }
 
     ctx.restore();
 }
 
+function createTargetFromSide() {
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    if (side === 0) {
+        x = 0; y = Math.random() * canvas.height;
+    } else if (side === 1) {
+        x = canvas.width; y = Math.random() * canvas.height;
+    } else if (side === 2) {
+        x = Math.random() * canvas.width; y = 0;
+    } else {
+        x = Math.random() * canvas.width; y = canvas.height;
+    }
+    return { x, y, dx: (Math.random() - 0.5) * 2, dy: (Math.random() - 0.5) * 2 };
+}
+
 function createTargets() {
     for (let i = 0; i < NUM_TARGETS; i++) {
-        targets.push({
-            x: Math.random() * (canvas.width - TARGET_SIZE),
-            y: Math.random() * (canvas.height - TARGET_SIZE),
-            dx: (Math.random() - 0.5) * 2,
-            dy: (Math.random() - 0.5) * 2
-        });
+        targets.push(createTargetFromSide());
     }
 }
 
 function moveTargets() {
     for (let target of targets) {
-        let dx = target.x + TARGET_SIZE / 2 - drone.x;
-        let dy = target.y + TARGET_SIZE / 2 - drone.y;
+        let dx = target.x - drone.x;
+        let dy = target.y - drone.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance < 100) {
@@ -83,15 +118,44 @@ function moveTargets() {
             target.y += target.dy;
         }
 
-        if (target.x < 0 || target.x > canvas.width - TARGET_SIZE) target.dx *= -1;
-        if (target.y < 0 || target.y > canvas.height - TARGET_SIZE) target.dy *= -1;
+        if (target.x < 0 || target.x > canvas.width) target.dx *= -1;
+        if (target.y < 0 || target.y > canvas.height) target.dy *= -1;
     }
 }
 
 function drawTargets() {
-    ctx.fillStyle = "red";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     for (let target of targets) {
-        ctx.fillRect(target.x, target.y, TARGET_SIZE, TARGET_SIZE);
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, TARGET_RADIUS * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+
+        ctx.fillStyle = "black";
+        ctx.font = "bold 18px Arial";
+        ctx.fillText("Z", target.x, target.y);
+    }
+}
+
+
+function drawExplosions() {
+    for (let i = explosions.length - 1; i >= 0; i--) {
+        const exp = explosions[i];
+        if (Date.now() - exp.time > 1000) {
+            explosions.splice(i, 1);
+        } else {
+            ctx.beginPath();
+            ctx.arc(exp.x, exp.y, 30, 0, Math.PI * 2);
+            ctx.fillStyle = "orange";
+            ctx.fill();
+        }
     }
 }
 
@@ -106,12 +170,33 @@ function moveDrone() {
 
 function checkCollisions() {
     for (let i = targets.length - 1; i >= 0; i--) {
-        let target = targets[i];
-        let dx = drone.x - (target.x + TARGET_SIZE / 2);
-        let dy = drone.y - (target.y + TARGET_SIZE / 2);
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < DRONE_SIZE / 2 && isDescending) {
+        let t = targets[i];
+        let dx = drone.x - t.x;
+        let dy = drone.y - t.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < DRONE_SIZE / 2 + TARGET_RADIUS && isDescending) {
+            explosions.push({ x: t.x, y: t.y, time: Date.now() });
+            explosionSound.currentTime = 0;
+            explosionSound.play();
+
+            for (let j = targets.length - 1; j >= 0; j--) {
+                if (i !== j) {
+                    let t2 = targets[j];
+                    let d2 = Math.hypot(t2.x - t.x, t2.y - t.y);
+                    if (d2 <= 5) {
+                        explosions.push({ x: t2.x, y: t2.y, time: Date.now() });
+                        targets.splice(j, 1);
+                        targets.push(createTargetFromSide());
+                        score++;
+                    }
+                }
+            }
             targets.splice(i, 1);
+            targets.push(createTargetFromSide());
+            drone = { x: 40, y: canvas.height - 40, dx: 0, dy: 0 };
+            score++;
+            scoreBoard.textContent = "Score: " + score;
+            break;
         }
     }
 }
@@ -122,10 +207,20 @@ function gameLoop() {
     moveTargets();
     drawDrone();
     drawTargets();
+    drawExplosions();
     checkCollisions();
-    if (isDescending && droneScale > 0.6) {
-        droneScale -= 0.02;
+
+    if (isDescending) {
+        if (Date.now() - descendStartTime > 2000) {
+            isDescending = false;
+            droneScale = 1.0;
+        } else if (droneScale > 0.6) {
+            droneScale -= 0.02;
+        }
+    } else if (droneScale < 1.0) {
+        droneScale += 0.02;
     }
+
     requestAnimationFrame(gameLoop);
 }
 
