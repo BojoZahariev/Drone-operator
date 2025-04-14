@@ -8,15 +8,21 @@ const DRONE_SPEED = 4;
 const TARGET_RADIUS = 15;
 const NUM_TARGETS = 7;
 const ESCAPE_SPEED = 2;
+const PROJECTILE_SPEED = 1.5;
+const PROJECTILE_RADIUS = 2;
+const SHOOT_INTERVAL = 4000; // Increased to 4 seconds
 let isDescending = false;
 let descendStartTime = null;
 let droneScale = 1.0;
 let score = 0;
+let gameActive = true;
 
 let drone = { x: canvas.width / 2, y: canvas.height / 2, dx: 0, dy: 0 };
 let targets = [];
 let explosions = [];
+let projectiles = [];
 let keysPressed = {};
+let lastShotTimes = {};
 
 function handleKeyDown(e) {
     if (e.key === ' ') {
@@ -95,7 +101,10 @@ function createTargetFromSide() {
     } else {
         x = Math.random() * canvas.width; y = canvas.height;
     }
-    return { x, y, dx: (Math.random() - 0.5) * 2, dy: (Math.random() - 0.5) * 2 };
+    const id = Math.random().toString(36).substr(2, 9);
+    // Stagger the initial shot times so they don't all shoot at once
+    lastShotTimes[id] = Date.now() - Math.random() * SHOOT_INTERVAL;
+    return { x, y, dx: (Math.random() - 0.5) * 2, dy: (Math.random() - 0.5) * 2, id };
 }
 
 function createTargets() {
@@ -118,8 +127,52 @@ function moveTargets() {
             target.y += target.dy;
         }
 
-        if (target.x < 0 || target.x > canvas.width) target.dx *= -1;
-        if (target.y < 0 || target.y > canvas.height) target.dy *= -1;
+        target.x = Math.max(TARGET_RADIUS, Math.min(canvas.width - TARGET_RADIUS, target.x));
+        target.y = Math.max(TARGET_RADIUS, Math.min(canvas.height - TARGET_RADIUS, target.y));
+
+        if (target.x <= TARGET_RADIUS || target.x >= canvas.width - TARGET_RADIUS) target.dx *= -1;
+        if (target.y <= TARGET_RADIUS || target.y >= canvas.height - TARGET_RADIUS) target.dy *= -1;
+    }
+}
+
+function shootProjectiles() {
+    const now = Date.now();
+    for (let target of targets) {
+        if (now - lastShotTimes[target.id] > SHOOT_INTERVAL) {
+            const dx = drone.x - target.x;
+            const dy = drone.y - target.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            projectiles.push({
+                x: target.x,
+                y: target.y,
+                dx: (dx / distance) * PROJECTILE_SPEED,
+                dy: (dy / distance) * PROJECTILE_SPEED
+            });
+
+            lastShotTimes[target.id] = now;
+        }
+    }
+}
+
+function moveProjectiles() {
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.x += p.dx;
+        p.y += p.dy;
+
+        if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+            projectiles.splice(i, 1);
+        }
+    }
+}
+
+function drawProjectiles() {
+    ctx.fillStyle = "yellow";
+    for (let p of projectiles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, PROJECTILE_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
     }
 }
 
@@ -144,7 +197,6 @@ function drawTargets() {
     }
 }
 
-
 function drawExplosions() {
     for (let i = explosions.length - 1; i >= 0; i--) {
         const exp = explosions[i];
@@ -160,6 +212,8 @@ function drawExplosions() {
 }
 
 function moveDrone() {
+    if (!gameActive) return;
+
     if (keysPressed['w'] || keysPressed['arrowup']) drone.y -= DRONE_SPEED;
     if (keysPressed['s'] || keysPressed['arrowdown']) drone.y += DRONE_SPEED;
     if (keysPressed['a'] || keysPressed['arrowleft']) drone.x -= DRONE_SPEED;
@@ -169,6 +223,8 @@ function moveDrone() {
 }
 
 function checkCollisions() {
+    if (!gameActive) return;
+
     for (let i = targets.length - 1; i >= 0; i--) {
         let t = targets[i];
         let dx = drone.x - t.x;
@@ -199,14 +255,31 @@ function checkCollisions() {
             break;
         }
     }
+
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        let p = projectiles[i];
+        let dx = drone.x - p.x;
+        let dy = drone.y - p.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < DRONE_SIZE / 2 + PROJECTILE_RADIUS) {
+            console.log("GAME OVER");
+            gameActive = false;
+            return;
+        }
+    }
 }
 
 function gameLoop() {
+    if (!gameActive) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     moveDrone();
     moveTargets();
+    shootProjectiles();
+    moveProjectiles();
     drawDrone();
     drawTargets();
+    drawProjectiles();
     drawExplosions();
     checkCollisions();
 
