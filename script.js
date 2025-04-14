@@ -10,7 +10,7 @@ const NUM_TARGETS = 7;
 const ESCAPE_SPEED = 2;
 const PROJECTILE_SPEED = 1.5;
 const PROJECTILE_RADIUS = 2;
-const SHOOT_INTERVAL = 4000; // Increased to 4 seconds
+const SHOOT_INTERVAL = 5000; // Shot interval
 let isDescending = false;
 let descendStartTime = null;
 let droneScale = 1.0;
@@ -252,7 +252,6 @@ function checkCollisions() {
             drone = { x: 40, y: canvas.height - 40, dx: 0, dy: 0 };
             score++;
             scoreBoard.textContent = "Score: " + score;
-            break;
         }
     }
 
@@ -263,6 +262,7 @@ function checkCollisions() {
         let dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < DRONE_SIZE / 2 + PROJECTILE_RADIUS) {
             console.log("GAME OVER");
+            document.getElementById('gameOver').style.display = 'block';
             gameActive = false;
             return;
         }
@@ -304,4 +304,9 @@ function initializeGame() {
     gameLoop();
 }
 
+
+document.getElementById('startBtn').addEventListener('click', initializeGame);
+
+
 initializeGame();
+
