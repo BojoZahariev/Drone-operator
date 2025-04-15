@@ -47,31 +47,36 @@ function drawDrone() {
     ctx.translate(drone.x, drone.y);
     ctx.scale(droneScale, droneScale);
 
+    // Body is now narrower (width 10) and longer (height 35 instead of 30)
     ctx.fillStyle = "#2F4F4F";
-    ctx.fillRect(-10, -15, 20, 30);
+    ctx.fillRect(-5, -17.5, 10, 35);
 
     ctx.strokeStyle = "#696969";
     ctx.lineWidth = 4;
 
+    // Arms (unchanged from original)
     ctx.beginPath();
     ctx.moveTo(-DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(-10, -15);
+    ctx.lineTo(-5, -17.5);
     ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(10, -15);
+    ctx.lineTo(5, -17.5);
     ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(-DRONE_SIZE / 2, DRONE_SIZE / 2);
-    ctx.lineTo(-10, 15);
+    ctx.lineTo(-5, 17.5);
     ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(DRONE_SIZE / 2, DRONE_SIZE / 2);
-    ctx.lineTo(10, 15);
+    ctx.lineTo(5, 17.5);
     ctx.stroke();
+
+    // Spinning propellers - ORIGINAL STYLE but with working rotation
+    const spinAngle = performance.now() / 50; // Rotation speed
 
     ctx.fillStyle = "#A9A9A9";
     const offsets = [
@@ -80,10 +85,24 @@ function drawDrone() {
         [-DRONE_SIZE / 2, DRONE_SIZE / 2],
         [DRONE_SIZE / 2, DRONE_SIZE / 2],
     ];
+
     for (let [x, y] of offsets) {
+        // Motor hub (original)
         ctx.beginPath();
         ctx.arc(x, y, 8, 0, Math.PI * 2);
         ctx.fill();
+
+        // BLADES - ORIGINAL STYLE BUT SPINNING
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(spinAngle); // THIS IS THE CRUCIAL LINE
+
+        // Original blade style - two thin rectangles
+        ctx.fillStyle = "rgba(200, 200, 200, 0.7)";
+        ctx.fillRect(-10, -2, 20, 4); // Horizontal blade
+        ctx.fillRect(-2, -10, 4, 20); // Vertical blade
+
+        ctx.restore();
     }
 
     ctx.restore();
@@ -309,4 +328,3 @@ document.getElementById('startBtn').addEventListener('click', initializeGame);
 
 
 initializeGame();
-
