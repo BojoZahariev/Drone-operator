@@ -10,13 +10,25 @@ body {
     overflow: hidden;
 }
 
+#landing-screen {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 canvas {
     border: 2px solid #4682b4;
     background-color: #b0c4de;
-    display: block;
+    display: none;
     margin-top: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 70vw;
+    /* 70% of the viewport width */
+    height: 70vh;
+    /* 70% of the viewport height */
+    /* background: url("https://c2.staticflickr.com/4/3438/3376557059_4c1fc0b6fc_b.jpg"); */
 }
 
 #scoreBoard {
@@ -35,5 +47,16 @@ canvas {
     font-size: 48px;
     font-weight: bold;
     color: red;
+    display: none;
+}
+
+#restartBtn {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: bold;
+
     display: none;
 }

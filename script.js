@@ -24,6 +24,26 @@ let projectiles = [];
 let keysPressed = {};
 let lastShotTimes = {};
 
+let animationFrameId;
+
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+
+
+
+// Function to resize the canvas based on viewport size
+function resizeCanvas() {
+    // Set the canvas element's width and height to 70% of the viewport size
+    canvas.width = window.innerWidth * 0.7;
+    canvas.height = window.innerHeight * 0.7;
+}
+
+// Call the resize function once when the page loads
+resizeCanvas();
+
+// Optionally, call resizeCanvas() whenever the window is resized
+window.addEventListener('resize', resizeCanvas);
+
 function handleKeyDown(e) {
     if (e.key === ' ') {
         if (!isDescending) descendStartTime = Date.now();
@@ -47,66 +67,54 @@ function drawDrone() {
     ctx.translate(drone.x, drone.y);
     ctx.scale(droneScale, droneScale);
 
-    // Body is now narrower (width 10) and longer (height 35 instead of 30)
-    ctx.fillStyle = "#2F4F4F";
-    ctx.fillRect(-5, -17.5, 10, 35);
+    const spinAngle = performance.now() / 50;
+    const armColor = "#222";
+    const rotorColor = "#A9A9A9";
+    const bladeColor = "rgba(200, 200, 200, 0.7)";
 
-    ctx.strokeStyle = "#696969";
-    ctx.lineWidth = 4;
+    const bodyWidth = 14;  // 20% narrower
+    const bodyHeight = 30;
 
-    // Arms (unchanged from original)
-    ctx.beginPath();
-    ctx.moveTo(-DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(-5, -17.5);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(DRONE_SIZE / 2, -DRONE_SIZE / 2);
-    ctx.lineTo(5, -17.5);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(-DRONE_SIZE / 2, DRONE_SIZE / 2);
-    ctx.lineTo(-5, 17.5);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(DRONE_SIZE / 2, DRONE_SIZE / 2);
-    ctx.lineTo(5, 17.5);
-    ctx.stroke();
-
-    // Spinning propellers - ORIGINAL STYLE but with working rotation
-    const spinAngle = performance.now() / 50; // Rotation speed
-
-    ctx.fillStyle = "#A9A9A9";
-    const offsets = [
+    const rotorOffsets = [
         [-DRONE_SIZE / 2, -DRONE_SIZE / 2],
         [DRONE_SIZE / 2, -DRONE_SIZE / 2],
         [-DRONE_SIZE / 2, DRONE_SIZE / 2],
         [DRONE_SIZE / 2, DRONE_SIZE / 2],
     ];
 
-    for (let [x, y] of offsets) {
-        // Motor hub (original)
+    // Arms from center to rotors
+    ctx.strokeStyle = armColor;
+    ctx.lineWidth = 3;
+    for (let [x, y] of rotorOffsets) {
         ctx.beginPath();
-        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.moveTo(0, 0);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    // Central rectangular body (black, 20% slimmer)
+    ctx.fillStyle = "#222";
+    ctx.fillRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
+
+    // Rotors and spinning blades
+    for (let [x, y] of rotorOffsets) {
+        ctx.fillStyle = rotorColor;
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
         ctx.fill();
 
-        // BLADES - ORIGINAL STYLE BUT SPINNING
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(spinAngle); // THIS IS THE CRUCIAL LINE
-
-        // Original blade style - two thin rectangles
-        ctx.fillStyle = "rgba(200, 200, 200, 0.7)";
+        ctx.rotate(spinAngle);
+        ctx.fillStyle = bladeColor;
         ctx.fillRect(-10, -2, 20, 4); // Horizontal blade
         ctx.fillRect(-2, -10, 4, 20); // Vertical blade
-
         ctx.restore();
     }
 
     ctx.restore();
 }
+
 
 function createTargetFromSide() {
     const side = Math.floor(Math.random() * 4);
@@ -199,22 +207,89 @@ function drawTargets() {
     ctx.font = "bold 16px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+
+    const currentTime = Date.now();
+
     for (let target of targets) {
+        // Draw the target itself (red circle with white inner circle)
         ctx.beginPath();
         ctx.arc(target.x, target.y, TARGET_RADIUS, 0, Math.PI * 2);
         ctx.fillStyle = "red";
         ctx.fill();
 
         ctx.beginPath();
-        ctx.arc(target.x, target.y, TARGET_RADIUS * 0.4, 0, Math.PI * 2);
+        ctx.arc(target.x, target.y, TARGET_RADIUS * 0.5, 0, Math.PI * 2);
         ctx.fillStyle = "white";
         ctx.fill();
 
+        // Draw the "Z" text inside the target
         ctx.fillStyle = "black";
         ctx.font = "bold 18px Arial";
         ctx.fillText("Z", target.x, target.y);
+
+        // Initialize speech delay timer if not already done
+        if (!target.speechDelayStartTime) {
+            // Random delay between 0 and 10 seconds for each target to start speaking
+            target.speechDelayStartTime = currentTime + Math.random() * 15000;  // Random delay per target
+        }
+
+        if (!target.speechBubbleText) {
+            target.speechBubbleText = '';  // Initialize speech bubble text if it doesn't exist
+        }
+
+        if (!target.speechBubbleStartTime) {
+            target.speechBubbleStartTime = 0;  // No speech bubble initially
+        }
+
+        // Check if enough time has passed (10 seconds after the random delay)
+        if (currentTime >= target.speechDelayStartTime) {
+            // If no speech bubble is already being shown, start a new one
+            if (!target.speechBubbleStartTime) {
+                const speechWords = ['Blyat!', 'Pisdets!', 'Yebat!'];
+                target.speechBubbleText = speechWords[Math.floor(Math.random() * speechWords.length)];
+                target.speechBubbleStartTime = currentTime;  // Set speech bubble start time
+            }
+        }
+
+        // Only show the speech bubble for 1 second after the target starts speaking
+        if (target.speechBubbleStartTime && currentTime - target.speechBubbleStartTime <= 1000) {
+            // Draw the speech bubble (above the target)
+            const bubbleX = target.x;
+            const bubbleY = target.y - TARGET_RADIUS - 25; // Position the bubble slightly above the target
+            const bubbleWidth = 70;
+            const bubbleHeight = 30;
+
+            // Draw bubble background (rounded rectangle)
+            ctx.beginPath();
+            ctx.moveTo(bubbleX - bubbleWidth / 2, bubbleY);
+            ctx.lineTo(bubbleX + bubbleWidth / 2, bubbleY);
+            ctx.lineTo(bubbleX + bubbleWidth / 2, bubbleY + bubbleHeight);
+            ctx.lineTo(bubbleX - bubbleWidth / 2, bubbleY + bubbleHeight);
+            ctx.closePath();
+            ctx.fillStyle = "white";
+            ctx.fill();
+            ctx.strokeStyle = "black";
+            ctx.stroke();
+
+            // Draw the speech bubble text
+            ctx.fillStyle = "black";
+            ctx.font = "bold 14px Arial";
+            ctx.fillText(target.speechBubbleText, bubbleX, bubbleY + bubbleHeight / 2); // Center the text vertically
+        }
+
+        // Reset the timer after speech bubble disappears (1 second)
+        if (target.speechBubbleStartTime && currentTime - target.speechBubbleStartTime > 1000) {
+            // After 1 second, reset the speech bubble start time for the next cycle
+            target.speechBubbleStartTime = 0;  // Reset the speech bubble start time
+            target.speechDelayStartTime = currentTime + 10000;  // Reset the random delay for the next cycle (10 seconds)
+        }
     }
 }
+
+
+
+
+
 
 function drawExplosions() {
     for (let i = explosions.length - 1; i >= 0; i--) {
@@ -280,8 +355,8 @@ function checkCollisions() {
         let dy = drone.y - p.y;
         let dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < DRONE_SIZE / 2 + PROJECTILE_RADIUS) {
-            console.log("GAME OVER");
             document.getElementById('gameOver').style.display = 'block';
+            document.getElementById('restartBtn').style.display = 'block';
             gameActive = false;
             return;
         }
@@ -313,18 +388,48 @@ function gameLoop() {
         droneScale += 0.02;
     }
 
-    requestAnimationFrame(gameLoop);
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 function initializeGame() {
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+
     createTargets();
     gameLoop();
 }
 
 
-document.getElementById('startBtn').addEventListener('click', initializeGame);
 
 
-initializeGame();
+document.getElementById('restartBtn').addEventListener('click', () => {
+
+    // Cancel previous animation frame to prevent stacking
+    cancelAnimationFrame(animationFrameId);
+
+    // Reset state
+    gameActive = true;
+    score = 0;
+    scoreBoard.textContent = "Score: 0";
+    drone = { x: canvas.width / 2, y: canvas.height / 2, dx: 0, dy: 0 };
+    projectiles = [];
+    explosions = [];
+    targets = [];
+    keysPressed = {};
+    lastShotTimes = {};
+    createTargets();
+    document.getElementById('gameOver').style.display = 'none';
+    document.getElementById('restartBtn').style.display = 'none';
+    gameLoop(); // Start fresh loop
+});
+
+
+document.getElementById('startButton').addEventListener('click', function () {
+    // Hide the landing screen and show the game canvas
+    document.getElementById('landing-screen').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    document.getElementById('startButton').style.display = 'none';
+
+    // Start the game by initializing it
+    initializeGame();
+});
+
+
