@@ -72,7 +72,7 @@ function drawDrone() {
     const rotorColor = "#A9A9A9";
     const bladeColor = "rgba(200, 200, 200, 0.7)";
 
-    const bodyWidth = 14;  // 20% narrower
+    const bodyWidth = 14;
     const bodyHeight = 30;
 
     const rotorOffsets = [
@@ -92,9 +92,23 @@ function drawDrone() {
         ctx.stroke();
     }
 
-    // Central rectangular body (black, 20% slimmer)
+    // Draw octagonal central body
     ctx.fillStyle = "#222";
-    ctx.fillRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
+    ctx.beginPath();
+    const w = bodyWidth / 2;
+    const h = bodyHeight / 2;
+    const cut = 4;
+
+    ctx.moveTo(-w + cut, -h);            // Top-left inward
+    ctx.lineTo(w - cut, -h);             // Top-right inward
+    ctx.lineTo(w, -h + cut);             // Right-top inward
+    ctx.lineTo(w, h - cut);              // Right-bottom inward
+    ctx.lineTo(w - cut, h);              // Bottom-right inward
+    ctx.lineTo(-w + cut, h);             // Bottom-left inward
+    ctx.lineTo(-w, h - cut);             // Left-bottom inward
+    ctx.lineTo(-w, -h + cut);            // Left-top inward
+    ctx.closePath();
+    ctx.fill();
 
     // Rotors and spinning blades
     for (let [x, y] of rotorOffsets) {
@@ -114,6 +128,7 @@ function drawDrone() {
 
     ctx.restore();
 }
+
 
 
 function createTargetFromSide() {
@@ -292,18 +307,39 @@ function drawTargets() {
 
 
 function drawExplosions() {
+    const now = Date.now();
+
     for (let i = explosions.length - 1; i >= 0; i--) {
         const exp = explosions[i];
-        if (Date.now() - exp.time > 1000) {
+        const age = now - exp.time;
+        const life = 1000;
+        if (age > life) {
             explosions.splice(i, 1);
-        } else {
+            continue;
+        }
+
+        const progress = age / life;
+        const easedProgress = Math.pow(progress, 0.6); // Expands quickly at first
+        const maxRadius = 60; // Slightly larger final size
+        const radius = maxRadius * easedProgress;
+        const alpha = 1 - progress;
+
+        const layers = [
+            { color: `rgba(255, 255, 255, ${alpha})`, scale: 0.3 },
+            { color: `rgba(255, 255, 0, ${alpha * 0.8})`, scale: 0.6 },
+            { color: `rgba(255, 140, 0, ${alpha * 0.6})`, scale: 0.85 },
+            { color: `rgba(255, 0, 0, ${alpha * 0.4})`, scale: 1 },
+        ];
+
+        for (let layer of layers) {
             ctx.beginPath();
-            ctx.arc(exp.x, exp.y, 30, 0, Math.PI * 2);
-            ctx.fillStyle = "orange";
+            ctx.arc(exp.x, exp.y, radius * layer.scale, 0, Math.PI * 2);
+            ctx.fillStyle = layer.color;
             ctx.fill();
         }
     }
 }
+
 
 function moveDrone() {
     if (!gameActive) return;
