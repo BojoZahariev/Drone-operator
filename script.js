@@ -461,7 +461,7 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 document.getElementById('startButton').addEventListener('click', function () {
     // Hide the landing screen and show the game canvas
     document.getElementById('landing-screen').style.display = 'none';
-    document.getElementById('gameCanvas').style.display = 'block';
+    document.getElementById('gameCanvasDiv').style.display = 'block';
     document.getElementById('startButton').style.display = 'none';
 
     // Start the game by initializing it
