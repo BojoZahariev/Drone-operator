@@ -6,23 +6,55 @@ body {
     overflow: hidden;
 }
 
+#header {
+    text-align: center; 
+}
+
+#instructions {
+    background-color: antiquewhite;
+    padding: 10px;
+    width: fit-content;
+    margin: auto;
+}
+
 #mainDiv {
-    display: flex;
+    /* display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif; */
 
 }
 
 #landing-screen {
-    text-align: center;
+    /* text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center; */
 }
 
+#mainBody {
+    display: flex;
+    flex-direction: row;
+    align-items: center; 
+}
+
+.addDiv {
+    flex-basis: 20%;
+}
 #gameCanvasDiv {
     display: none;
+}
+
+#landingImg {
+    background-image: url("/images/orc4.jpg"); 
+  background-color: #cccccc; 
+ 
+  background-position: center center; 
+  background-repeat: no-repeat; 
+  background-size: cover; 
+  width: 100%;
+  height: 80vh;
+  position: relative;
 }
 
 canvas {
@@ -79,11 +111,11 @@ canvas {
     cursor: pointer;
     display: inline-block;
     font-family: din-round, sans-serif;
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: .8px;
     line-height: 20px;
-    margin: 0;
+    margin: auto;
     outline: none;
     overflow: visible;
     padding: 13px 16px;
@@ -96,7 +128,11 @@ canvas {
     -webkit-user-select: none;
     vertical-align: middle;
     white-space: nowrap;
-    width: 100%;
+    width: 50%;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
 
 #startButton:after {
