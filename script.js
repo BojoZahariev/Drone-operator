@@ -210,7 +210,7 @@ function moveProjectiles() {
 }
 
 function drawProjectiles() {
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "red";
     for (let p of projectiles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, PROJECTILE_RADIUS, 0, Math.PI * 2);
