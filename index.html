@@ -26,24 +26,43 @@
             </div>
 
             <!-- <button id="startButton">Start Game</button> -->
-            
-          <div id="mainBody">
-             <div class="addDiv"></div>
+
+            <div id="mainBody">
+                <div class="addDiv">
+                    <img src="https://cdn.prod.website-files.com/62715a6db03abb780c30efdc/627d27731ad1ef0b52693b23_001_logo_drone%26txt_163x28_001.svg"
+                        loading="lazy" width="350" id="w-node-_581c0474-4a40-ab90-30f4-4a757cff073c-7cff0739" alt=""
+                        class="image-35">
+
+                </div>
                 <div id="landingImg">
 
-                   <button id="startButton" role="button">Start Game</button>
-               </div>
-              <div class="addDiv"></div>
-          </div>
+                    <button id="startButton" role="button">Start Game</button>
+
+                    <img id="orcImg" src="/images/orc.png" alt="Landing" />
+                </div>
+                <div class="addDiv">
+
+                    <img id="united24" src="/images/UNITED24_logo.png" alt="Landing" />
+                </div>
+            </div>
         </div>
 
 
         <div id="gameCanvasDiv">
+            <p id="instructions">Use <strong>WASD</strong> or <strong>Arrow Keys</strong> to move the
+                drone.<br>Hold
+                <strong>SPACEBAR</strong> to
+                descend and destroy the invaders!
+            </p>
             <div id="scoreBoard">Score: 0</div>
             <div id="gameOver">GAME OVER</div>
             <button id="restartBtn">Try Again</button>
 
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div id="innerContainer">
+                <div class="addDiv"></div>
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div class="addDiv"></div>
+            </div>
 
             <audio id="explosionSound" src="explosion-312361.mp3" preload="auto"></audio>
 

@@ -260,7 +260,7 @@ function drawTargets() {
         if (currentTime >= target.speechDelayStartTime) {
             // If no speech bubble is already being shown, start a new one
             if (!target.speechBubbleStartTime) {
-                const speechWords = ['Blyat!', 'Pisdets!', 'Yebat!'];
+                const speechWords = ['Блят!', 'Пиздец!', 'Ебать!', 'На Берлин!'];
                 target.speechBubbleText = speechWords[Math.floor(Math.random() * speechWords.length)];
                 target.speechBubbleStartTime = currentTime;  // Set speech bubble start time
             }
@@ -271,7 +271,7 @@ function drawTargets() {
             // Draw the speech bubble (above the target)
             const bubbleX = target.x;
             const bubbleY = target.y - TARGET_RADIUS - 25; // Position the bubble slightly above the target
-            const bubbleWidth = 70;
+            const bubbleWidth = 80;
             const bubbleHeight = 30;
 
             // Draw bubble background (rounded rectangle)
@@ -467,5 +467,4 @@ document.getElementById('startButton').addEventListener('click', function () {
     // Start the game by initializing it
     initializeGame();
 });
-
 
