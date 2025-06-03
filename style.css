@@ -81,6 +81,11 @@ body {
 #orcImg {
     display: block;
     margin: auto;
+    height: 100%;
+}
+
+#united24 {
+    width: 300px;
 }
 
 canvas {
@@ -193,4 +198,21 @@ canvas {
 #startButton:active {
     border-width: 4px 0 0;
     background: none;
+}
+
+
+@media only screen and (max-width: 1000px) {
+    #mainBody {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #landingImg {
+        order: 1;
+    }
+
+    .addDiv {
+        order: 2;
+        margin-top: 10px;
+    }
 }
