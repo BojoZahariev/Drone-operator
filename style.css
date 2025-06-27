@@ -10,6 +10,14 @@ body {
     text-align: center;
 }
 
+#title {
+    font-family: "Eater", serif;
+    font-weight: 400;
+    font-size: 90px;
+    margin-top: 0px;
+    color: red;
+}
+
 #instructions {
     background-color: antiquewhite;
     padding: 10px;
@@ -54,10 +62,23 @@ body {
 
 }
 
+#gameCanvas {
+    display: block;
+    margin: auto;
+}
+
 #innerContainer {
+    /* display: flex;
+    flex-direction: column; */
+    align-items: center;
+}
+
+#addsContainer2 {
+    margin-top: 20px;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 #landingImg {
@@ -200,6 +221,12 @@ canvas {
     background: none;
 }
 
+
+.carter-one-regular {
+    font-family: "Carter One", system-ui;
+    font-weight: 400;
+    font-style: normal;
+}
 
 @media only screen and (max-width: 1000px) {
     #mainBody {
