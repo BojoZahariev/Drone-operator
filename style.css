@@ -1,5 +1,6 @@
 body {
-    background-color: #f0f8ff;
+    /* background-color: #f0f8ff; */
+    background-color: #FEFEE3;
     margin: 0;
     padding: 20px;
     color: #333;
@@ -11,11 +12,27 @@ body {
 }
 
 #title {
-    font-family: "Eater", serif;
-    font-weight: 400;
     font-size: 90px;
     margin-top: 0px;
-    color: red;
+    margin-bottom: 10px;
+    color: #D33E43;
+    letter-spacing: 1px;
+}
+
+.redLetters {
+    color: #D33E43;
+}
+
+.bowlby-one-sc-regular {
+    font-family: "Bowlby One SC", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.keania {
+    font-family: "Keania One", sans-serif;
+    font-weight: 400;
+    font-style: normal;
 }
 
 #instructions {
@@ -59,6 +76,7 @@ body {
 
 #gameCanvasDiv {
     display: none;
+
 
 }
 
@@ -111,7 +129,7 @@ body {
 
 canvas {
     border: 2px solid #4682b4;
-    background-color: #b0c4de;
+    background-color: #A1CCA5;
 
     margin-top: 15px;
     border-radius: 8px;
@@ -124,35 +142,31 @@ canvas {
 }
 
 #scoreBoard {
-
     font-size: 20px;
     font-weight: bold;
+    text-align: center;
+    margin: 5px;
 }
 
-#gameOver {
+#gameOverDiv {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 48px;
-    font-weight: bold;
-    color: red;
+}
+
+#gameOver {
+    color: #D33E43;
+    letter-spacing: 1px;
+    font-size: 65px;
     display: none;
 }
 
 #restartBtn {
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 48px;
-    font-weight: bold;
-
     display: none;
 }
 
-
-#startButton {
+.startButtons {
     appearance: button;
     background-color: #1899D6;
     border: solid transparent;
@@ -180,6 +194,10 @@ canvas {
     -webkit-user-select: none;
     vertical-align: middle;
     white-space: nowrap;
+}
+
+#startButton {
+
     width: 50%;
     position: absolute;
     bottom: 20px;

@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drone operator</title>
+    <title>Drone pilot</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.png">
     <link rel="stylesheet" href="style.css">
 
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Keania+One&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Carter+One&family=Eater&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -21,7 +23,7 @@
 
         <div id="landing-screen">
             <div id="header">
-                <h1 id="title">Drone pilot</h1>
+                <h1 id="title" class="bowlby-one-sc-regular">Drone pilot</h1>
                 <!-- <p id="instructions">Use <strong>WASD</strong> or <strong>Arrow Keys</strong> to move the
                     drone.<br>Hold
                     <strong>SPACEBAR</strong> to
@@ -41,7 +43,7 @@
                 </div>
                 <div id="landingImg">
 
-                    <button id="startButton" role="button">Start Game</button>
+                    <button id="startButton" class="startButtons" role="button">Start Game</button>
 
                     <img id="orcImg" src="/images/orc.png" alt="Landing" />
 
@@ -56,18 +58,20 @@
 
 
         <div id="gameCanvasDiv">
-            <p id="instructions">Use <strong>WASD</strong> or <strong>Arrow Keys</strong> to move the
-                drone.<br>Hold
-                <strong>SPACEBAR</strong> to
-                descend and destroy the invaders!
+            <p id="instructions" class="keania">Use <strong class="redLetters">W A S D</strong> or <strong
+                    class="redLetters">Arrow Keys</strong> to move the
+                drone.<br>Hold <strong class="redLetters">SPACEBAR</strong> to descend and destroy the invaders.
             </p>
-            <div id="scoreBoard">Score: 0</div>
-            <div id="gameOver">GAME OVER</div>
-            <button id="restartBtn">Try Again</button>
+
+
+            <div id="gameOverDiv">
+                <p id="gameOver" class="bowlby-one-sc-regular">GAME OVER</p>
+                <button id="restartBtn" class="startButtons">Try Again</button>
+            </div>
+
 
             <div id="innerContainer">
-
-
+                <p id="scoreBoard" class="keania">Score: 0</p>
 
                 <canvas id="gameCanvas" width="800" height="600"></canvas>
 
