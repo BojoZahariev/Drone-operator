@@ -148,6 +148,11 @@ canvas {
     margin: 5px;
 }
 
+#scoreNumber {
+    font-size: 30px;
+    color: #D33E43;
+}
+
 #gameOverDiv {
     position: absolute;
     top: 50%;

@@ -1,6 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreBoard = document.getElementById('scoreBoard');
+const scoreBoard = document.getElementById('scoreNumber');
 const explosionSound = document.getElementById('explosionSound');
 
 const DRONE_SIZE = 40;
@@ -381,7 +381,7 @@ function checkCollisions() {
             targets.push(createTargetFromSide());
             drone = { x: 40, y: canvas.height - 40, dx: 0, dy: 0 };
             score++;
-            scoreBoard.textContent = "Score: " + score;
+            scoreBoard.textContent = score;
         }
     }
 
@@ -444,7 +444,7 @@ document.getElementById('restartBtn').addEventListener('click', () => {
     // Reset state
     gameActive = true;
     score = 0;
-    scoreBoard.textContent = "Score: 0";
+    scoreBoard.textContent = "0";
     drone = { x: canvas.width / 2, y: canvas.height / 2, dx: 0, dy: 0 };
     projectiles = [];
     explosions = [];
